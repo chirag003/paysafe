@@ -13,7 +13,7 @@ var path = require('path');
 const port = 3000;
 
 app.use(cors());
-// Configuring body parser middleware
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -31,16 +31,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 //routes for token
 app.post("/token", function(req, res) {
 	
-	findpaysafe={
-		"email":req.body.email
-	}
-	console.log(findpaysafe)
-		Paysafe.find(findpaysafe, async function(err,paysafe){
+	var param={"email":req.body.email}
+		Paysafe.find(param, async function(err,paysafe){
 			if(err){
 				console.log(err);
 			}else{
-				console.log("-----------");
-				console.log("paysafe",paysafe.length);
 				if(paysafe.length==0){
 					 await helper.getId(req.body,
 						 function(result){
@@ -50,25 +45,23 @@ app.post("/token", function(req, res) {
 								email:req.body.email
 							}
 							// console.log(newpaysafe)
-							Paysafe.create(newpaysafe,async function(err, newlyCreated){
+							Paysafe.create(newpaysafe,async function(err, d){
 								if(err){
 									console.log(err);
 								} else {
-									console.log("///////////////////////////////////");
-									paysafe=newlyCreated;
+									paysafe=d;
 									console.log("paysafe**********",paysafe)
 									await token.getToken(paysafe.payid,function(result){
-                                    console.log(result,'-------------------tokensent')
+                                    // console.log(result,'-------------------tokensent')
 									res.send({token:result});
 								})
-									console.log("added",newlyCreated)
 								}
 							});
 					 });	
 				}else{
 					console.log("paysafe",paysafe)
 						await token.getToken(paysafe[0].payid,function(result){
-                        console.log(result,'-------------------tokensent')
+                        // console.log(result,'-------------------tokensent')
 						res.send({token:result});
 					})
 				}
@@ -80,13 +73,12 @@ app.post("/token", function(req, res) {
 app.post("/payment", async(req, res) => {
   	console.log(req.body);
 	await payment.onPay(req.body,function(result){
-		console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^",result)
 		res.send({data:result.status});
 	});
 });
 
 
-app.listen(port, () => console.log(`Hello world app listening on port ${port}!`));
+app.listen(port, () => console.log(`App listening on port ${port}!`));
 
 
 // Where we will keep books
